@@ -1,7 +1,7 @@
-CREATE TABLE servicos(
+CREATE TABLE servico(
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nome VARCHAR(150) NOT NULL UNIQUE,
-    valor NUMERIC(10, 2) NOT NULL CHECK(preco > 0),
+    valor NUMERIC(10, 2) NOT NULL CHECK(valor > 0),
     duracao_minutos INTEGER NOT NULL CHECK(duracao_minutos > 0),
     ativo BOOLEAN NOT NULL DEFAULT TRUE, 
     criado_em TIMESTAMPTZ NOT NULL DEFAULT now()

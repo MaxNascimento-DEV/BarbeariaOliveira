@@ -13,7 +13,7 @@ CREATE TABLE agendamento (
     CONSTRAINT fk_agendamento_barbeiro
         FOREIGN KEY (barbeiro_id) REFERENCES barbeiro (id),
     CONSTRAINT fk_agendamento_servico
-        FOREIGN KEY (servico_id) REFERENCES servico (id),
+        FOREIGN KEY (servico_id) REFERENCES servico(id),
     CONSTRAINT ck_agendamento_status
         CHECK (status IN ('AGENDADO', 'CONFIRMADO', 'EM_ANDAMENTO', 'CONCLUIDO', 'CANCELADO')),
     CONSTRAINT ck_agendamento_horario

@@ -1,3 +1,17 @@
 spring:
   application:
     name: barbearia-oliveira
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/barbeariaOliveira
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
