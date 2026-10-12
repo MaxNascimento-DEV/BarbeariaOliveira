@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.barbeariaoliveira.dto.ServicoRequest;
 import com.barbeariaoliveira.dto.ServicoResponse;
 import com.barbeariaoliveira.entity.Servico;
+import com.barbeariaoliveira.exception.RecursoNaoEncontradoException;
 import com.barbeariaoliveira.exception.RegraNegocioException;
 import com.barbeariaoliveira.mapper.ServicoMapper;
 import com.barbeariaoliveira.repository.ServicoRepository;
@@ -63,7 +64,7 @@ public class ServicoService {
     }
     
     private Servico buscarEntidadePorId(Long id){
-        Servico servico = servicoRepository.findById(id).orElseThrow(() -> new RegraNegocioException("Serviço não encontrado."));
+        Servico servico = servicoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado."));
         return servico; 
     }
 
