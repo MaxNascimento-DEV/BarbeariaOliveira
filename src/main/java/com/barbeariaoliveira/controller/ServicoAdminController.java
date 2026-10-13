@@ -18,7 +18,7 @@ public class ServicoAdminController {
         this.servicoService = servicoService;
     }
 
-    @GetMapping("/ativos")
+    @GetMapping
     public List<ServicoResponse> listarTodos(){
         return servicoService.listarTodos(); 
     }
