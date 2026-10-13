@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ServicoService {
-    public final ServicoRepository servicoRepository;
-    public final ServicoMapper servicoMapper;
+    private final ServicoRepository servicoRepository;
+    private final ServicoMapper servicoMapper;
     
     public ServicoService(ServicoRepository servicoRepository, ServicoMapper servicoMapper){
         this.servicoRepository = servicoRepository;
