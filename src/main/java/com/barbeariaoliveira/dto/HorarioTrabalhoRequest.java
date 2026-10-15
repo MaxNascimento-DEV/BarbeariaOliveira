@@ -36,7 +36,7 @@ public record HorarioTrabalhoRequest(
            if (horaAbertura == null || horaFechamento == null || almocoInicio == null || almocoFim == null) {
                 return true; 
            }
-           return !almocoInicio.isBefore(horaAbertura) && almocoFim.isAfter(horaFechamento) && !almocoFim.isAfter(almocoInicio);
+           return !almocoInicio.isBefore(horaAbertura) && !almocoFim.isAfter(horaFechamento) && almocoFim.isAfter(almocoInicio);
         }
     
 }
