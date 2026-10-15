@@ -14,4 +14,9 @@ spring:
     properties:
       hibernate:
         jdbc:
-          time_zone: UTC
+          "[time_zone]": UTC
+
+barbearia:
+  fuso-horario: America/Recife
+  antecedencia-minima: 30m
+  dias-maximos-antecedencia: 30
