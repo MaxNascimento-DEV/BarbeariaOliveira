@@ -10,6 +10,7 @@ public record BarbeariaProperties(
 
     ZoneId fusoHorario,
     Duration antecedenciaMinima,
-    int diasMaximosAntecedencia
+    int diasMaximosAntecedencia,
+    Duration prazoConfirmacao
 
 ) {}

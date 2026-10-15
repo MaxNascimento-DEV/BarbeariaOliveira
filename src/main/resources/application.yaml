@@ -20,3 +20,4 @@ barbearia:
   fuso-horario: America/Recife
   antecedencia-minima: 30m
   dias-maximos-antecedencia: 30
+  prazo-confirmacao: 20m
