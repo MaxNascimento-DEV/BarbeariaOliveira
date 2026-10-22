@@ -23,4 +23,6 @@ boolean existeConflito(@Param("barbeiroId") Long barbeiroId,
                        @Param("inicio") Instant inicio,
                        @Param("fim") Instant fim);
 
+
+        boolean existsByTelefoneClienteAndStatusIn(String telefoneCliente, Collection<StatusAgendamento> status);
 }
