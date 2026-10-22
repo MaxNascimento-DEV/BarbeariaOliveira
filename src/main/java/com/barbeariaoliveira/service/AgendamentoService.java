@@ -56,7 +56,7 @@ public class AgendamentoService {
     }
 
     private Barbeiro buscarBarbeiroAtivo(Long barbeiroId){
-        Barbeiro barbeiro = barbeiroRepository.findById(barbeiroId).orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado"));
+        Barbeiro barbeiro = barbeiroRepository.buscarComLock(barbeiroId).orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado"));
 
         if (!barbeiro.getAtivo()) {
             throw new RegraNegocioException("Este barbeiro não está disponivel para agendamento. ");
