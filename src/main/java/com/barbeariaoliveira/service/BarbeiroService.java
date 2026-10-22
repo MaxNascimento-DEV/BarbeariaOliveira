@@ -13,6 +13,7 @@ import com.barbeariaoliveira.exception.RecursoNaoEncontradoException;
 import com.barbeariaoliveira.exception.RegraNegocioException;
 import com.barbeariaoliveira.mapper.BarbeiroMapper;
 import com.barbeariaoliveira.repository.BarbeiroRepository;
+import com.barbeariaoliveira.util.TelefoneUtils;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +28,6 @@ public class BarbeiroService {
         this.barbeiroRepository = barbeiroRepository;
     }
 
-   private String normalizarTelefone(String telefone) {
-    return telefone.replaceAll("\\D", "");
-    }
 
     private String normalizaEspecialidade(String especialidade){
         if(especialidade == null || especialidade.isBlank()){
@@ -46,7 +44,7 @@ public class BarbeiroService {
 
     @Transactional 
     public BarbeiroResponse criar(BarbeiroRequest request){
-        String telefone = normalizarTelefone(request.telefone());
+        String telefone = TelefoneUtils.normalizar(request.telefone());
         if(barbeiroRepository.existsByTelefone(telefone)){
             throw new RegraNegocioException("Já existe um barbeiro com esse telefone."); 
         }
@@ -88,7 +86,7 @@ public class BarbeiroService {
     @Transactional
     public BarbeiroResponse atualizar(Long id, BarbeiroRequest request){
         Barbeiro barbeiro = buscarEntidadePorId(id);
-        String telefone = normalizarTelefone(request.telefone()); 
+        String telefone = TelefoneUtils.normalizar(request.telefone()); 
 
         if (barbeiroRepository.existsByTelefoneAndIdNot(telefone, id)) {
             throw new RegraNegocioException("ja existe um barbeiro com esse telefone.");             
