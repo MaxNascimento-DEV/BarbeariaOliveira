@@ -1,5 +1,6 @@
 package com.barbeariaoliveira.enums;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 public enum StatusAgendamento {
@@ -8,6 +9,10 @@ public enum StatusAgendamento {
     EM_ANDAMENTO,
     CONCLUIDO,
     CANCELADO;
+
+
+    public static final Set<StatusAgendamento> ATIVOS = 
+    EnumSet.of(AGENDADO, CONFIRMADO, EM_ANDAMENTO); 
 
     public boolean podeMudarPara(StatusAgendamento novo) {
         return switch (this) {
