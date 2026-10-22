@@ -43,7 +43,7 @@ public class AgendamentoService {
         this.agendamentoMapper = agendamentoMapper;
         this.barbeariaProperties = barbeariaProperties;
     }
-
+    // -------------- Auxiliares (private) -------------- 
     private Servico buscarServicoAtivo(Long servicoId){
           Servico servico = servicoRepository.findById(servicoId)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado."));
@@ -65,6 +65,23 @@ public class AgendamentoService {
         return barbeiro; 
     }
 
+    private Agendamento buscarEntidadePorId(Long id){
+        return agendamentoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Agendamento não encontrado."));
+    }
+
+    private void mudarStatus(Agendamento agendamento, StatusAgendamento novo){
+        StatusAgendamento atual = agendamento.getStatus(); 
+
+        if(!atual.podeMudarPara(novo)){
+            throw new RegraNegocioException("Não é possível alterar o agendamento de " + atual + " para " + novo + ".");
+        }
+
+        agendamento.setStatus(novo); 
+    }
+
+
+
+    // ---------------- Ações públicas (chamadas pelos Controllers) --------------------
     @Transactional 
     public AgendamentoResponse criar(AgendamentoRequest request){
         Servico servico = buscarServicoAtivo(request.servicoId());
@@ -139,7 +156,27 @@ public class AgendamentoService {
 
     }
 
+    @Transactional
+    public AgendamentoResponse confirmar(Long id){
+       Agendamento agendamento = buscarEntidadePorId(id); 
+        
+        mudarStatus(agendamento, StatusAgendamento.CONFIRMADO);
 
+        Agendamento salvo = agendamentoRepository.save(agendamento);
+        
+        return agendamentoMapper.toResponse(salvo); 
+    }
+
+    @Transactional 
+    public AgendamentoResponse cancelar(Long id){
+        Agendamento agendamento = buscarEntidadePorId(id);
+
+        mudarStatus(agendamento, StatusAgendamento.CANCELADO);
+
+        Agendamento salvo = agendamentoRepository.save(agendamento);
+
+        return agendamentoMapper.toResponse(salvo); 
+    }
 
 
 
