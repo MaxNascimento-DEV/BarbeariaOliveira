@@ -1,11 +1,11 @@
 package com.barbeariaoliveira.controller;
 
+import java.time.*;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.barbeariaoliveira.dto.AgendamentoRequest;
 import com.barbeariaoliveira.dto.AgendamentoResponse;
@@ -28,5 +28,10 @@ public class AgendamentoPublicController {
     public AgendamentoResponse criar(@Valid @RequestBody AgendamentoRequest request){
         return agendamentoService.criar(request); 
     }
+
+    @GetMapping("/disponibilidade")
+    public List<LocalTime> listarDisponiveis(@RequestParam Long barbeiroId, @RequestParam Long servicoId,@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+    return agendamentoService.listarDisponiveis(barbeiroId, servicoId, data);
+}
 
 }
