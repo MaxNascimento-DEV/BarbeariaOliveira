@@ -265,47 +265,58 @@ private void validarBarbeiroAtivo(Barbeiro barbeiro) {
     }
 
     private Optional<String> verificarHorario(LocalDateTime inicioLocal,
-                                              Servico servico,
-                                              HorarioTrabalho horario,
-                                              List<Agendamento> ocupados,
-                                              Instant agora) {
-        ZoneId fuso = barbeariaProperties.fusoHorario();
-        LocalDateTime fimLocal = inicioLocal.plusMinutes(servico.getDuracaoMinutos());
-        Instant inicio = inicioLocal.atZone(fuso).toInstant();
-        Instant fim = inicio.plus(Duration.ofMinutes(servico.getDuracaoMinutos()));
+                                          Servico servico,
+                                          HorarioTrabalho horario,
+                                          List<Agendamento> ocupados,
+                                          Instant agora) {
+    ZoneId fuso = barbeariaProperties.fusoHorario();
+    LocalDateTime fimLocal = inicioLocal.plusMinutes(servico.getDuracaoMinutos());
+    Instant inicio = inicioLocal.atZone(fuso).toInstant();
+    Instant fim = inicio.plus(Duration.ofMinutes(servico.getDuracaoMinutos()));
 
-        
-        Optional<String> motivoJanela = verificarJanela(inicio, agora);
-        if (motivoJanela.isPresent()) {
-            return motivoJanela;
-        }
-
-        // Dentro do expediente
-        LocalDate data = inicioLocal.toLocalDate();
-        LocalDateTime abertura = data.atTime(horario.getHoraAbertura());
-        LocalDateTime fechamento = data.atTime(horario.getHoraFechamento());
-        if (inicioLocal.isBefore(abertura) || fimLocal.isAfter(fechamento)) {
-            return Optional.of("O barbeiro atende das " + horario.getHoraAbertura()
-                    + " às " + horario.getHoraFechamento() + " neste dia.");
-        }
-
-        // Fora do almoço
-        if (horario.getAlmocoInicio() != null) {
-            LocalDateTime almocoInicio = data.atTime(horario.getAlmocoInicio());
-            LocalDateTime almocoFim = data.atTime(horario.getAlmocoFim());
-            if (inicioLocal.isBefore(almocoFim) && fimLocal.isAfter(almocoInicio)) {
-                return Optional.of("Este horário coincide com o intervalo de almoço do barbeiro ("
-                        + horario.getAlmocoInicio() + " às " + horario.getAlmocoFim() + ").");
-            }
-        }
-
-        // Conflito com outros agendamentos
-        for (Agendamento ocupado : ocupados) {
-            if (ocupado.getDataHoraInicio().isBefore(fim) && ocupado.getDataHoraFim().isAfter(inicio)) {
-                return Optional.of("Este horário já está ocupado. Escolha outro horário.");
-            }
-        }
-
-        return Optional.empty();
+    // Antecedência mínima e limite
+    Optional<String> motivoJanela = verificarJanela(inicio, agora);
+    if (motivoJanela.isPresent()) {
+        return motivoJanela;
     }
+
+    // Dentro do expediente
+    LocalDate data = inicioLocal.toLocalDate();
+    LocalDateTime abertura = data.atTime(horario.getHoraAbertura());
+    LocalDateTime fechamento = data.atTime(horario.getHoraFechamento());
+    if (inicioLocal.isBefore(abertura) || fimLocal.isAfter(fechamento)) {
+        return Optional.of("O barbeiro atende das " + horario.getHoraAbertura()
+                + " às " + horario.getHoraFechamento() + " neste dia.");
+    }
+
+    // alinhado à grade de horários (ex.: 09:00, 09:30, 10:00...)
+    long minutosDesdeAbertura = Duration.between(abertura, inicioLocal).toMinutes();
+    long intervalo = barbeariaProperties.intervaloHorarios().toMinutes();
+    boolean alinhado = inicioLocal.getSecond() == 0
+            && inicioLocal.getNano() == 0
+            && minutosDesdeAbertura % intervalo == 0;
+    if (!alinhado) {
+        return Optional.of("Escolha um dos horários disponíveis (de "
+                + intervalo + " em " + intervalo + " minutos).");
+    }
+
+    // Fora do almoço
+    if (horario.getAlmocoInicio() != null) {
+        LocalDateTime almocoInicio = data.atTime(horario.getAlmocoInicio());
+        LocalDateTime almocoFim = data.atTime(horario.getAlmocoFim());
+        if (inicioLocal.isBefore(almocoFim) && fimLocal.isAfter(almocoInicio)) {
+            return Optional.of("Este horário coincide com o intervalo de almoço do barbeiro ("
+                    + horario.getAlmocoInicio() + " às " + horario.getAlmocoFim() + ").");
+        }
+    }
+
+    // Conflito com outros agendamentos
+    for (Agendamento ocupado : ocupados) {
+        if (ocupado.getDataHoraInicio().isBefore(fim) && ocupado.getDataHoraFim().isAfter(inicio)) {
+            return Optional.of("Este horário já está ocupado. Escolha outro horário.");
+        }
+    }
+
+    return Optional.empty();
+}
 }
