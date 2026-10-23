@@ -194,4 +194,26 @@ public class AgendamentoService {
         return respostas; 
 
     }
+
+    @Transactional
+    public void processarTransicoesAutomaticas(){
+        Instant agora = Instant.now(); 
+
+        List<Agendamento> naoConfirmados = agendamentoRepository.findByStatusAndDataHoraInicioLessThanEqual(StatusAgendamento.AGENDADO, agora.plus(barbeariaProperties.prazoConfirmacao()));
+
+        for(Agendamento agendamento : naoConfirmados){
+            mudarStatus(agendamento, StatusAgendamento.CANCELADO);
+        }
+
+        List<Agendamento> paraIniciar = agendamentoRepository.findByStatusAndDataHoraInicioLessThanEqual(StatusAgendamento.CONFIRMADO, agora); 
+        for(Agendamento agendamento : paraIniciar){
+            mudarStatus(agendamento, StatusAgendamento.EM_ANDAMENTO);
+        }
+
+        List<Agendamento> paraConcluir = agendamentoRepository.findByStatusAndDataHoraFimLessThanEqual(StatusAgendamento.EM_ANDAMENTO, agora);
+        for(Agendamento agendamento : paraConcluir){
+            mudarStatus(agendamento, StatusAgendamento.CONCLUIDO);
+        }
+
+    }
 }

@@ -39,4 +39,8 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
         """)
       List<Agendamento> buscarPorPeriodo(@Param("inicio") Instant inicio,
                                    @Param("fim") Instant fim);
+
+      List<Agendamento> findByStatusAndDataHoraInicioLessThanEqual(StatusAgendamento status, Instant limite);       
+      
+      List<Agendamento> findByStatusAndDataHoraFimLessThanEqual(StatusAgendamento status, Instant limite);
 }
