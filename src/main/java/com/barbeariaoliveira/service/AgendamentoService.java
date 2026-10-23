@@ -1,8 +1,9 @@
 package com.barbeariaoliveira.service;
 
 import java.time.*;
-
+import java.util.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.barbeariaoliveira.config.BarbeariaProperties;
 import com.barbeariaoliveira.dto.AgendamentoRequest;
@@ -22,7 +23,6 @@ import com.barbeariaoliveira.repository.HorarioTrabalhoRepository;
 import com.barbeariaoliveira.repository.ServicoRepository;
 import com.barbeariaoliveira.util.TelefoneUtils;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class AgendamentoService {
@@ -178,6 +178,20 @@ public class AgendamentoService {
         return agendamentoMapper.toResponse(salvo); 
     }
 
+    @Transactional(readOnly = true)
+    public List<AgendamentoResponse> listarPorData(LocalDate data){
+        ZoneId fuso = barbeariaProperties.fusoHorario(); 
+        Instant inicioDoDia = data.atStartOfDay(fuso).toInstant();
+        Instant fimDoDia = data.plusDays(1).atStartOfDay(fuso).toInstant(); 
 
+        List<Agendamento> agendamentos = agendamentoRepository.buscarPorPeriodo(inicioDoDia, fimDoDia); 
 
+        List<AgendamentoResponse> respostas = new ArrayList<>();
+        for(Agendamento agendamento : agendamentos){
+            respostas.add(agendamentoMapper.toResponse(agendamento)); 
+        }
+
+        return respostas; 
+
+    }
 }
