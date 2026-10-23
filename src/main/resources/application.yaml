@@ -21,3 +21,4 @@ barbearia:
   antecedencia-minima: 60m
   dias-maximos-antecedencia: 30
   prazo-confirmacao: 20m
+  intervalo-horarios: 30m
