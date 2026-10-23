@@ -12,20 +12,6 @@ import com.barbeariaoliveira.enums.StatusAgendamento;
 
 public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> {
 
-    @Query("""
-        SELECT COUNT(a) > 0
-        FROM Agendamento a
-        WHERE a.barbeiro.id = :barbeiroId
-          AND a.status IN :statusQueOcupam
-          AND a.dataHoraInicio < :fim
-          AND a.dataHoraFim > :inicio
-        """)
-    boolean existeConflito(@Param("barbeiroId") Long barbeiroId,
-                       @Param("statusQueOcupam") Collection<StatusAgendamento> statusQueOcupam,
-                       @Param("inicio") Instant inicio,
-                       @Param("fim") Instant fim);
-
-
         boolean existsByTelefoneClienteAndStatusIn(String telefoneCliente, Collection<StatusAgendamento> status);
 
         @Query("""
@@ -37,10 +23,20 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
           AND a.dataHoraInicio < :fim
         ORDER BY a.dataHoraInicio
         """)
-      List<Agendamento> buscarPorPeriodo(@Param("inicio") Instant inicio,
-                                   @Param("fim") Instant fim);
+      List<Agendamento> buscarPorPeriodo(@Param("inicio") Instant inicio, @Param("fim") Instant fim);
 
       List<Agendamento> findByStatusAndDataHoraInicioLessThanEqual(StatusAgendamento status, Instant limite);       
       
       List<Agendamento> findByStatusAndDataHoraFimLessThanEqual(StatusAgendamento status, Instant limite);
+
+      @Query("""
+        SELECT a
+        FROM Agendamento a
+        WHERE a.barbeiro.id = :barbeiroId 
+          AND a.status IN :status
+          AND a.dataHoraInicio >= :inicio
+          AND a.dataHoraInicio < :fim
+          ORDER BY a.dataHoraInicio
+        """)
+      List<Agendamento> buscarOcupadosNoPeriodo(@Param("barbeiroId") Long barbeiroId, @Param("status") Collection<StatusAgendamento> status, @Param("inicio") Instant inicio, @Param("fim") Instant fim);
 }
