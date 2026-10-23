@@ -168,6 +168,41 @@ public class AgendamentoService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<LocalTime> listarDisponiveis(Long barbeiroId, Long servicoId, LocalDate data) {
+        Servico servico = buscarServicoAtivo(servicoId);
+        Barbeiro barbeiro = buscarBarbeiroAtivoSemLock(barbeiroId);   // sem a chave!
+
+    // O barbeiro trabalha nesse dia? (decisão 1: erro 409)
+        DiaSemana dia = DiaSemana.de(data.getDayOfWeek());
+        HorarioTrabalho horario = horarioTrabalhoRepository
+            .findByBarbeiroIdAndDiaSemana(barbeiro.getId(), dia)
+            .orElseThrow(() -> new RegraNegocioException("O barbeiro não atende neste dia."));
+
+    // O que já ocupa o barbeiro nesse dia (uma consulta só)
+        ZoneId fuso = barbeariaProperties.fusoHorario();
+        List<Agendamento> ocupados = agendamentoRepository.buscarOcupadosNoPeriodo(
+            barbeiro.getId(),
+            StatusAgendamento.ATIVOS,
+            data.atStartOfDay(fuso).toInstant(),
+            data.plusDays(1).atStartOfDay(fuso).toInstant());
+
+    // Testar cada candidato, de intervalo em intervalo
+        Instant agora = Instant.now();
+        LocalDateTime fechamento = data.atTime(horario.getHoraFechamento());
+        LocalDateTime candidato = data.atTime(horario.getHoraAbertura());
+        List<LocalTime> disponiveis = new ArrayList<>();
+
+        while (!candidato.plusMinutes(servico.getDuracaoMinutos()).isAfter(fechamento)) {
+        if (verificarHorario(candidato, servico, horario, ocupados, agora).isEmpty()) {
+            disponiveis.add(candidato.toLocalTime());
+        }
+        candidato = candidato.plus(barbeariaProperties.intervaloHorarios());
+    }
+
+        return disponiveis;
+}
+
     // ---------------- Auxiliares (private) ----------------
 
     private Servico buscarServicoAtivo(Long servicoId) {
@@ -179,14 +214,28 @@ public class AgendamentoService {
         return servico;
     }
 
-    private Barbeiro buscarBarbeiroAtivo(Long barbeiroId) {
-        Barbeiro barbeiro = barbeiroRepository.buscarComLock(barbeiroId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado."));
-        if (!barbeiro.getAtivo()) {
-            throw new RegraNegocioException("Este barbeiro não está disponível para agendamento.");
-        }
-        return barbeiro;
+// Para o criar: busca COM a chave
+private Barbeiro buscarBarbeiroAtivo(Long barbeiroId) {
+    Barbeiro barbeiro = barbeiroRepository.buscarComLock(barbeiroId)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado."));
+    validarBarbeiroAtivo(barbeiro);
+    return barbeiro;
+}
+
+// Para consultas: busca SEM a chave
+private Barbeiro buscarBarbeiroAtivoSemLock(Long barbeiroId) {
+    Barbeiro barbeiro = barbeiroRepository.findById(barbeiroId)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado."));
+    validarBarbeiroAtivo(barbeiro);
+    return barbeiro;
+}
+
+// A regra do "ativo", num lugar só
+private void validarBarbeiroAtivo(Barbeiro barbeiro) {
+    if (!barbeiro.getAtivo()) {
+        throw new RegraNegocioException("Este barbeiro não está disponível para agendamento.");
     }
+}
 
     private Agendamento buscarEntidadePorId(Long id) {
         return agendamentoRepository.findById(id)
