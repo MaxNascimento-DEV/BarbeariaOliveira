@@ -18,6 +18,6 @@ spring:
 
 barbearia:
   fuso-horario: America/Recife
-  antecedencia-minima: 30m
+  antecedencia-minima: 60m
   dias-maximos-antecedencia: 30
   prazo-confirmacao: 20m
