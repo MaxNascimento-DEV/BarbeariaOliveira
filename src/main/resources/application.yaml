@@ -16,6 +16,11 @@ spring:
         jdbc:
           "[time_zone]": UTC
 
+  flyway:
+    placeholders:
+      admin_email: ${ADMIN_EMAIL}
+      admin_senha_hash: ${ADMIN_SENHA_HASH}
+
 barbearia:
   fuso-horario: America/Recife
   antecedencia-minima: 60m
