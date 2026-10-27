@@ -22,3 +22,7 @@ barbearia:
   dias-maximos-antecedencia: 30
   prazo-confirmacao: 20m
   intervalo-horarios: 30m
+
+jwt:
+  segredo: ${JWT_SECRET}
+  expiracao: 8h
