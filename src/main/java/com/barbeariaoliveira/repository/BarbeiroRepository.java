@@ -9,12 +9,15 @@ import org.springframework.data.repository.query.Param;
 import com.barbeariaoliveira.entity.Barbeiro;
 import jakarta.persistence.LockModeType;
 
-public interface BarbeiroRepository extends JpaRepository<Barbeiro, Long>{
+public interface BarbeiroRepository extends JpaRepository<Barbeiro, Long> {
 
     List<Barbeiro> findByAtivoTrueOrderByNomeAsc();
-    List<Barbeiro> findAllByOrderByNomeAsc(); 
-    boolean existsByTelefoneAndIdNot(String telefone, Long id); 
-    boolean existsByTelefone(String telefone); 
+
+    List<Barbeiro> findAllByOrderByNomeAsc();
+
+    boolean existsByTelefoneAndIdNot(String telefone, Long id);
+
+    boolean existsByTelefone(String telefone);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT b FROM Barbeiro b WHERE b.id = :id")

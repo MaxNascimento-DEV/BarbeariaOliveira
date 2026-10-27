@@ -14,7 +14,7 @@ import lombok.*;
 @Table(name = "barbeiro")
 public class Barbeiro {
 
-    @Id 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -25,15 +25,14 @@ public class Barbeiro {
     private String especialidade;
 
     @Column(nullable = false, length = 20)
-    private String telefone; 
+    private String telefone;
 
     @Builder.Default
-    @Column(nullable = false )
-    private Boolean ativo = true; 
+    @Column(nullable = false)
+    private Boolean ativo = true;
 
     @CreationTimestamp
     @Column(name = "criado_em", nullable = false, updatable = false)
-    private Instant criadoEm; 
-
+    private Instant criadoEm;
 
 }

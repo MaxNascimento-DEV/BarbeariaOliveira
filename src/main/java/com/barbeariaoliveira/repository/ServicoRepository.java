@@ -1,8 +1,6 @@
 package com.barbeariaoliveira.repository;
 
 import java.util.List;
-
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.barbeariaoliveira.entity.Servico;
 
@@ -12,7 +10,7 @@ public interface ServicoRepository extends JpaRepository<Servico, Long> {
 
     boolean existsByNomeIgnoreCase(String nome);
 
-    boolean existsByNomeIgnoreCaseAndIdNot(String nome, Long id);  
+    boolean existsByNomeIgnoreCaseAndIdNot(String nome, Long id);
 
-    List<Servico> findAllByOrderByNomeAsc(); 
+    List<Servico> findAllByOrderByNomeAsc();
 }

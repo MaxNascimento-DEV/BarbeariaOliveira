@@ -35,11 +35,11 @@ public class AgendamentoService {
     private final BarbeariaProperties barbeariaProperties;
 
     public AgendamentoService(AgendamentoRepository agendamentoRepository,
-                              ServicoRepository servicoRepository,
-                              BarbeiroRepository barbeiroRepository,
-                              HorarioTrabalhoRepository horarioTrabalhoRepository,
-                              AgendamentoMapper agendamentoMapper,
-                              BarbeariaProperties barbeariaProperties) {
+            ServicoRepository servicoRepository,
+            BarbeiroRepository barbeiroRepository,
+            HorarioTrabalhoRepository horarioTrabalhoRepository,
+            AgendamentoMapper agendamentoMapper,
+            BarbeariaProperties barbeariaProperties) {
         this.agendamentoRepository = agendamentoRepository;
         this.servicoRepository = servicoRepository;
         this.barbeiroRepository = barbeiroRepository;
@@ -84,7 +84,7 @@ public class AgendamentoService {
 
         // Expediente, almoço e conflito
         Optional<String> motivo = verificarHorario(
-                request.dataHoraInicio(), servico, horario, ocupados, agora);   // ⭐ "agora" no lugar de Instant.now()
+                request.dataHoraInicio(), servico, horario, ocupados, agora); // ⭐ "agora" no lugar de Instant.now()
         if (motivo.isPresent()) {
             throw new RegraNegocioException(motivo.get());
         }
@@ -171,37 +171,37 @@ public class AgendamentoService {
     @Transactional(readOnly = true)
     public List<LocalTime> listarDisponiveis(Long barbeiroId, Long servicoId, LocalDate data) {
         Servico servico = buscarServicoAtivo(servicoId);
-        Barbeiro barbeiro = buscarBarbeiroAtivoSemLock(barbeiroId);   // sem a chave!
+        Barbeiro barbeiro = buscarBarbeiroAtivoSemLock(barbeiroId); // sem a chave!
 
-    // O barbeiro trabalha nesse dia? (decisão 1: erro 409)
+        // O barbeiro trabalha nesse dia? (decisão 1: erro 409)
         DiaSemana dia = DiaSemana.de(data.getDayOfWeek());
         HorarioTrabalho horario = horarioTrabalhoRepository
-            .findByBarbeiroIdAndDiaSemana(barbeiro.getId(), dia)
-            .orElseThrow(() -> new RegraNegocioException("O barbeiro não atende neste dia."));
+                .findByBarbeiroIdAndDiaSemana(barbeiro.getId(), dia)
+                .orElseThrow(() -> new RegraNegocioException("O barbeiro não atende neste dia."));
 
-    // O que já ocupa o barbeiro nesse dia (uma consulta só)
+        // O que já ocupa o barbeiro nesse dia (uma consulta só)
         ZoneId fuso = barbeariaProperties.fusoHorario();
         List<Agendamento> ocupados = agendamentoRepository.buscarOcupadosNoPeriodo(
-            barbeiro.getId(),
-            StatusAgendamento.ATIVOS,
-            data.atStartOfDay(fuso).toInstant(),
-            data.plusDays(1).atStartOfDay(fuso).toInstant());
+                barbeiro.getId(),
+                StatusAgendamento.ATIVOS,
+                data.atStartOfDay(fuso).toInstant(),
+                data.plusDays(1).atStartOfDay(fuso).toInstant());
 
-    // Testar cada candidato, de intervalo em intervalo
+        // Testar cada candidato, de intervalo em intervalo
         Instant agora = Instant.now();
         LocalDateTime fechamento = data.atTime(horario.getHoraFechamento());
         LocalDateTime candidato = data.atTime(horario.getHoraAbertura());
         List<LocalTime> disponiveis = new ArrayList<>();
 
         while (!candidato.plusMinutes(servico.getDuracaoMinutos()).isAfter(fechamento)) {
-        if (verificarHorario(candidato, servico, horario, ocupados, agora).isEmpty()) {
-            disponiveis.add(candidato.toLocalTime());
+            if (verificarHorario(candidato, servico, horario, ocupados, agora).isEmpty()) {
+                disponiveis.add(candidato.toLocalTime());
+            }
+            candidato = candidato.plus(barbeariaProperties.intervaloHorarios());
         }
-        candidato = candidato.plus(barbeariaProperties.intervaloHorarios());
-    }
 
         return disponiveis;
-}
+    }
 
     // ---------------- Auxiliares (private) ----------------
 
@@ -214,28 +214,28 @@ public class AgendamentoService {
         return servico;
     }
 
-// Para o criar: busca COM a chave
-private Barbeiro buscarBarbeiroAtivo(Long barbeiroId) {
-    Barbeiro barbeiro = barbeiroRepository.buscarComLock(barbeiroId)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado."));
-    validarBarbeiroAtivo(barbeiro);
-    return barbeiro;
-}
-
-// Para consultas: busca SEM a chave
-private Barbeiro buscarBarbeiroAtivoSemLock(Long barbeiroId) {
-    Barbeiro barbeiro = barbeiroRepository.findById(barbeiroId)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado."));
-    validarBarbeiroAtivo(barbeiro);
-    return barbeiro;
-}
-
-// A regra do "ativo", num lugar só
-private void validarBarbeiroAtivo(Barbeiro barbeiro) {
-    if (!barbeiro.getAtivo()) {
-        throw new RegraNegocioException("Este barbeiro não está disponível para agendamento.");
+    // Para o criar: busca COM a chave
+    private Barbeiro buscarBarbeiroAtivo(Long barbeiroId) {
+        Barbeiro barbeiro = barbeiroRepository.buscarComLock(barbeiroId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado."));
+        validarBarbeiroAtivo(barbeiro);
+        return barbeiro;
     }
-}
+
+    // Para consultas: busca SEM a chave
+    private Barbeiro buscarBarbeiroAtivoSemLock(Long barbeiroId) {
+        Barbeiro barbeiro = barbeiroRepository.findById(barbeiroId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Barbeiro não encontrado."));
+        validarBarbeiroAtivo(barbeiro);
+        return barbeiro;
+    }
+
+    // A regra do "ativo", num lugar só
+    private void validarBarbeiroAtivo(Barbeiro barbeiro) {
+        if (!barbeiro.getAtivo()) {
+            throw new RegraNegocioException("Este barbeiro não está disponível para agendamento.");
+        }
+    }
 
     private Agendamento buscarEntidadePorId(Long id) {
         return agendamentoRepository.findById(id)
@@ -265,58 +265,58 @@ private void validarBarbeiroAtivo(Barbeiro barbeiro) {
     }
 
     private Optional<String> verificarHorario(LocalDateTime inicioLocal,
-                                          Servico servico,
-                                          HorarioTrabalho horario,
-                                          List<Agendamento> ocupados,
-                                          Instant agora) {
-    ZoneId fuso = barbeariaProperties.fusoHorario();
-    LocalDateTime fimLocal = inicioLocal.plusMinutes(servico.getDuracaoMinutos());
-    Instant inicio = inicioLocal.atZone(fuso).toInstant();
-    Instant fim = inicio.plus(Duration.ofMinutes(servico.getDuracaoMinutos()));
+            Servico servico,
+            HorarioTrabalho horario,
+            List<Agendamento> ocupados,
+            Instant agora) {
+        ZoneId fuso = barbeariaProperties.fusoHorario();
+        LocalDateTime fimLocal = inicioLocal.plusMinutes(servico.getDuracaoMinutos());
+        Instant inicio = inicioLocal.atZone(fuso).toInstant();
+        Instant fim = inicio.plus(Duration.ofMinutes(servico.getDuracaoMinutos()));
 
-    // Antecedência mínima e limite
-    Optional<String> motivoJanela = verificarJanela(inicio, agora);
-    if (motivoJanela.isPresent()) {
-        return motivoJanela;
-    }
-
-    // Dentro do expediente
-    LocalDate data = inicioLocal.toLocalDate();
-    LocalDateTime abertura = data.atTime(horario.getHoraAbertura());
-    LocalDateTime fechamento = data.atTime(horario.getHoraFechamento());
-    if (inicioLocal.isBefore(abertura) || fimLocal.isAfter(fechamento)) {
-        return Optional.of("O barbeiro atende das " + horario.getHoraAbertura()
-                + " às " + horario.getHoraFechamento() + " neste dia.");
-    }
-
-    // alinhado à grade de horários (ex.: 09:00, 09:30, 10:00...)
-    long minutosDesdeAbertura = Duration.between(abertura, inicioLocal).toMinutes();
-    long intervalo = barbeariaProperties.intervaloHorarios().toMinutes();
-    boolean alinhado = inicioLocal.getSecond() == 0
-            && inicioLocal.getNano() == 0
-            && minutosDesdeAbertura % intervalo == 0;
-    if (!alinhado) {
-        return Optional.of("Escolha um dos horários disponíveis (de "
-                + intervalo + " em " + intervalo + " minutos).");
-    }
-
-    // Fora do almoço
-    if (horario.getAlmocoInicio() != null) {
-        LocalDateTime almocoInicio = data.atTime(horario.getAlmocoInicio());
-        LocalDateTime almocoFim = data.atTime(horario.getAlmocoFim());
-        if (inicioLocal.isBefore(almocoFim) && fimLocal.isAfter(almocoInicio)) {
-            return Optional.of("Este horário coincide com o intervalo de almoço do barbeiro ("
-                    + horario.getAlmocoInicio() + " às " + horario.getAlmocoFim() + ").");
+        // Antecedência mínima e limite
+        Optional<String> motivoJanela = verificarJanela(inicio, agora);
+        if (motivoJanela.isPresent()) {
+            return motivoJanela;
         }
-    }
 
-    // Conflito com outros agendamentos
-    for (Agendamento ocupado : ocupados) {
-        if (ocupado.getDataHoraInicio().isBefore(fim) && ocupado.getDataHoraFim().isAfter(inicio)) {
-            return Optional.of("Este horário já está ocupado. Escolha outro horário.");
+        // Dentro do expediente
+        LocalDate data = inicioLocal.toLocalDate();
+        LocalDateTime abertura = data.atTime(horario.getHoraAbertura());
+        LocalDateTime fechamento = data.atTime(horario.getHoraFechamento());
+        if (inicioLocal.isBefore(abertura) || fimLocal.isAfter(fechamento)) {
+            return Optional.of("O barbeiro atende das " + horario.getHoraAbertura()
+                    + " às " + horario.getHoraFechamento() + " neste dia.");
         }
-    }
 
-    return Optional.empty();
-}
+        // alinhado à grade de horários (ex.: 09:00, 09:30, 10:00...)
+        long minutosDesdeAbertura = Duration.between(abertura, inicioLocal).toMinutes();
+        long intervalo = barbeariaProperties.intervaloHorarios().toMinutes();
+        boolean alinhado = inicioLocal.getSecond() == 0
+                && inicioLocal.getNano() == 0
+                && minutosDesdeAbertura % intervalo == 0;
+        if (!alinhado) {
+            return Optional.of("Escolha um dos horários disponíveis (de "
+                    + intervalo + " em " + intervalo + " minutos).");
+        }
+
+        // Fora do almoço
+        if (horario.getAlmocoInicio() != null) {
+            LocalDateTime almocoInicio = data.atTime(horario.getAlmocoInicio());
+            LocalDateTime almocoFim = data.atTime(horario.getAlmocoFim());
+            if (inicioLocal.isBefore(almocoFim) && fimLocal.isAfter(almocoInicio)) {
+                return Optional.of("Este horário coincide com o intervalo de almoço do barbeiro ("
+                        + horario.getAlmocoInicio() + " às " + horario.getAlmocoFim() + ").");
+            }
+        }
+
+        // Conflito com outros agendamentos
+        for (Agendamento ocupado : ocupados) {
+            if (ocupado.getDataHoraInicio().isBefore(fim) && ocupado.getDataHoraFim().isAfter(inicio)) {
+                return Optional.of("Este horário já está ocupado. Escolha outro horário.");
+            }
+        }
+
+        return Optional.empty();
+    }
 }
