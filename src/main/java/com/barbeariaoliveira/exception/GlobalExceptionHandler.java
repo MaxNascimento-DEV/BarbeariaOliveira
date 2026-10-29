@@ -23,35 +23,42 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
                 Instant.now(),
-                null
-        );
+                null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErroResponse tratarValidacao(MethodArgumentNotValidException ex) {
-    Map<String, String> campos = new HashMap<>();
+        Map<String, String> campos = new HashMap<>();
 
-    for (FieldError erro : ex.getBindingResult().getFieldErrors()) {
-        campos.put(erro.getField(), erro.getDefaultMessage()); 
+        for (FieldError erro : ex.getBindingResult().getFieldErrors()) {
+            campos.put(erro.getField(), erro.getDefaultMessage());
+        }
+
+        return new ErroResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Dados Inválidos.",
+                Instant.now(),
+                campos);
     }
-
-    return new ErroResponse(
-        HttpStatus.BAD_REQUEST.value(),
-        "Dados Inválidos.",
-        Instant.now(),
-        campos
-    );
-}
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErroResponse tratarNaoEncontrado(RecursoNaoEncontradoException ex){
+    public ErroResponse tratarNaoEncontrado(RecursoNaoEncontradoException ex) {
         return new ErroResponse(
-            HttpStatus.NOT_FOUND.value(),
-            ex.getMessage(),
-            Instant.now(),
-            null
-        ); 
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                Instant.now(),
+                null);
+    }
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErroResponse tratarCredenciaisInvalidas(CredenciaisInvalidasException ex) {
+        return new ErroResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage(),
+                Instant.now(),
+                null);
     }
 }
