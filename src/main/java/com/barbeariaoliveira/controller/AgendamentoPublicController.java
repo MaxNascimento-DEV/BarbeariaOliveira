@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.barbeariaoliveira.dto.AgendamentoRequest;
 import com.barbeariaoliveira.dto.AgendamentoResponse;
+import com.barbeariaoliveira.security.RecaptchaService;
 import com.barbeariaoliveira.service.AgendamentoService;
 
 import jakarta.validation.Valid;
@@ -17,16 +18,23 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/public/agendamentos")
 public class AgendamentoPublicController {
 
-    private final AgendamentoService agendamentoService;
+    private static final String ACAO_RECAPTCHA = "agendar";
 
-    public AgendamentoPublicController(AgendamentoService agendamentoService){
+    private final AgendamentoService agendamentoService;
+    private final RecaptchaService recaptchaService;
+
+    public AgendamentoPublicController(AgendamentoService agendamentoService,
+                                       RecaptchaService recaptchaService) {
         this.agendamentoService = agendamentoService;
+        this.recaptchaService = recaptchaService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public AgendamentoResponse criar(@Valid @RequestBody AgendamentoRequest request){
-        return agendamentoService.criar(request); 
+        // Verificado ANTES do Service: a chamada ao Google não pode acontecer com o lock do barbeiro preso
+        recaptchaService.verificar(request.recaptchaToken(), ACAO_RECAPTCHA);
+        return agendamentoService.criar(request);
     }
 
     @GetMapping("/disponibilidade")

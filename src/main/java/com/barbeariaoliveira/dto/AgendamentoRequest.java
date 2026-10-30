@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record AgendamentoRequest(
-    
 
     @NotNull(message = "A escolha do serviço é obrigatória.")
     Long servicoId,
@@ -16,15 +15,18 @@ public record AgendamentoRequest(
     @NotNull(message = "A escolha do barbeiro é obrigatória.")
     Long barbeiroId,
 
-    @NotNull(message = "O Horário é obrigatorio")
+    @NotNull(message = "O horário é obrigatório.")
     LocalDateTime dataHoraInicio,
 
-    @NotBlank(message = "O nome é obrigatória.")
+    @NotBlank(message = "O nome é obrigatório.")
     @Size(min = 3, max = 150, message =  "O nome deve ter entre 3 e 150 caracteres.")
     String nomeCliente,
 
-    @NotBlank(message = "O telefone é obrigatório")
+    @NotBlank(message = "O telefone é obrigatório.")
     @Pattern(regexp = "^[0-9()\\s+-]{10,20}$", message = "Telefone inválido.")
-    String telefoneCliente
+    String telefoneCliente,
+
+    // Token gerado pelo reCAPTCHA v3 no navegador (opcional enquanto o reCAPTCHA estiver desligado)
+    String recaptchaToken
 
 ) {}
