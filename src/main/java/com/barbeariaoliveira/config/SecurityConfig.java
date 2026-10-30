@@ -13,12 +13,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.barbeariaoliveira.security.JwtAuthenticationFilter;
 import com.barbeariaoliveira.security.JwtService;
+import com.barbeariaoliveira.security.RateLimitFilter;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService,
+                                                   RateLimitProperties rateLimitProperties) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -31,6 +33,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService),
                         UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new RateLimitFilter(rateLimitProperties),
+                        JwtAuthenticationFilter.class)
                 .build();
     }
 
