@@ -61,4 +61,14 @@ public class GlobalExceptionHandler {
                 Instant.now(),
                 null);
     }
+
+    @ExceptionHandler(RecaptchaInvalidoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroResponse tratarRecaptchaInvalido(RecaptchaInvalidoException ex) {
+        return new ErroResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                Instant.now(),
+                null);
+    }
 }
