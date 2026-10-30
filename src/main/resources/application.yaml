@@ -39,3 +39,9 @@ rate-limit:
   login:
     capacidade: 5
     periodo: 15m
+
+recaptcha:
+  habilitado: ${RECAPTCHA_HABILITADO:false}
+  segredo: ${RECAPTCHA_SECRET:}
+  nota-minima: 0.5
+  url: https://www.google.com/recaptcha/api/siteverify
