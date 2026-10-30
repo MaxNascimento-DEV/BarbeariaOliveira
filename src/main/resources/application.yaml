@@ -31,3 +31,11 @@ barbearia:
 jwt:
   segredo: ${JWT_SECRET}
   expiracao: 8h
+
+rate-limit:
+  agendamento:
+    capacidade: 10
+    periodo: 1h
+  login:
+    capacidade: 5
+    periodo: 15m
