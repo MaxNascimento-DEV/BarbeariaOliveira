@@ -9,6 +9,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.barbeariaoliveira.repository.UsuarioRepository;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,9 +21,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String PREFIXO = "Bearer ";
 
     private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UsuarioRepository usuarioRepository) {
         this.jwtService = jwtService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -33,14 +37,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (cabecalho != null && cabecalho.startsWith(PREFIXO)) {
             String token = cabecalho.substring(PREFIXO.length());
-            Optional<Long> adminId = jwtService.extrairAdminId(token);
 
-            if (adminId.isPresent()) {
+            // Token válido + usuário ainda ativo no banco
+            Optional<UsuarioLogado> logado = jwtService.extrairUsuarioId(token)
+                    .flatMap(usuarioRepository::buscarLogado);
+
+            if (logado.isPresent()) {
+                UsuarioLogado usuario = logado.get();
+                // Com senha provisória, o único acesso liberado é a troca de senha (/api/conta/**)
+                String papel = usuario.precisaTrocarSenha() ? "ROLE_TROCA_SENHA" : "ROLE_" + usuario.perfil().name();
+
                 UsernamePasswordAuthenticationToken autenticacao =
                         new UsernamePasswordAuthenticationToken(
-                                adminId.get(),
+                                usuario,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+                                List.of(new SimpleGrantedAuthority(papel)));
                 SecurityContextHolder.getContext().setAuthentication(autenticacao);
             }
         }

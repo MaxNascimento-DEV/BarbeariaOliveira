@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.barbeariaoliveira.config.JwtProperties;
 import com.barbeariaoliveira.dto.LoginResponse;
-import com.barbeariaoliveira.entity.UsuarioAdmin;
+import com.barbeariaoliveira.entity.Usuario;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -29,21 +29,28 @@ public class JwtService {
         this.expiracao = jwtProperties.expiracao();
     }
 
-    public LoginResponse gerarToken(UsuarioAdmin admin) {
+    /**
+     * O token guarda só o ID do usuário (subject). Perfil, barbeiro e "trocar senha"
+     * são lidos do banco a cada requisição pelo JwtAuthenticationFilter — assim,
+     * desativar alguém ou redefinir a senha vale na hora, sem esperar o token expirar.
+     */
+    public LoginResponse gerarToken(Usuario usuario) {
         Instant agora = Instant.now();
         Instant expiraEm = agora.plus(expiracao);
 
         String token = Jwts.builder()
-                .subject(admin.getId().toString())
+                .subject(usuario.getId().toString())
                 .issuedAt(Date.from(agora))
                 .expiration(Date.from(expiraEm))
                 .signWith(chave)
                 .compact();
 
-        return new LoginResponse(token, expiraEm);
+        Long barbeiroId = usuario.getBarbeiro() == null ? null : usuario.getBarbeiro().getId();
+        return new LoginResponse(token, expiraEm, usuario.getNome(), usuario.getEmail(),
+                usuario.getPerfil(), barbeiroId, usuario.getTrocarSenha());
     }
 
-    public Optional<Long> extrairAdminId(String token) {
+    public Optional<Long> extrairUsuarioId(String token) {
         try {
             String subject = Jwts.parser()
                     .verifyWith(chave)
