@@ -13,7 +13,7 @@ import com.barbeariaoliveira.entity.Agendamento;
 import com.barbeariaoliveira.util.TelefoneUtils;
 
 /**
- * Monta links "clique para conversar" do WhatsApp (https://wa.me/...), que abrem o
+ * Monta links "clique para conversar" do WhatsApp (https://api.whatsapp.com/send?...), que abrem o
  * WhatsApp de quem clica já com a mensagem escrita. Não usa API, não tem custo
  * e não depende de cadastro na Meta: quem aperta "enviar" é uma pessoa.
  */
@@ -80,6 +80,8 @@ public class WhatsAppLinkBuilder {
             return null; // ex.: telefone da barbearia ainda não configurado
         }
         String textoCodificado = URLEncoder.encode(texto, StandardCharsets.UTF_8).replace("+", "%20");
-        return "https://wa.me/" + numero + "?text=" + textoCodificado;
+        // Usa o endereço final (api.whatsapp.com) em vez de wa.me: o redirecionamento do wa.me
+        // recodifica o texto e corrompe os emojis (aparecem como "�").
+        return "https://api.whatsapp.com/send?phone=" + numero + "&text=" + textoCodificado;
     }
 }
