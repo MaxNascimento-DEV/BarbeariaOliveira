@@ -2,6 +2,7 @@ package com.barbeariaoliveira.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,17 @@ public class AgendamentoAdminController {
     @GetMapping
     public List<AgendamentoResponse> listarPorData(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate data){
         return agendamentoService.listarPorData(data);
+    }
+
+    // Usado pelo painel para tocar o aviso de "novo agendamento"
+    @GetMapping("/novos")
+    public List<AgendamentoResponse> listarNovos(@RequestParam Long aposId) {
+        return agendamentoService.listarCriadosApos(aposId);
+    }
+
+    @GetMapping("/ultimo-id")
+    public Map<String, Long> ultimoId() {
+        return Map.of("id", agendamentoService.buscarUltimoId());
     }
 
     @PatchMapping("/{id}/confirmar")

@@ -25,6 +25,49 @@ public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> 
         """)
       List<Agendamento> buscarPorPeriodo(@Param("inicio") Instant inicio, @Param("fim") Instant fim);
 
+      // Painel: agendamentos criados depois do último que o navegador já viu
+      @Query("""
+        SELECT a
+        FROM Agendamento a
+        JOIN FETCH a.servico
+        JOIN FETCH a.barbeiro
+        WHERE a.id > :aposId
+        ORDER BY a.id
+        """)
+      List<Agendamento> buscarCriadosApos(@Param("aposId") Long aposId);
+
+      @Query("SELECT COALESCE(MAX(a.id), 0) FROM Agendamento a")
+      Long buscarUltimoId();
+
+      // ---- Painel do barbeiro (sempre filtrado pelo barbeiro do login) ----
+
+      @Query("""
+        SELECT a
+        FROM Agendamento a
+        JOIN FETCH a.servico
+        JOIN FETCH a.barbeiro
+        WHERE a.barbeiro.id = :barbeiroId
+          AND a.dataHoraInicio >= :inicio
+          AND a.dataHoraInicio < :fim
+        ORDER BY a.dataHoraInicio
+        """)
+      List<Agendamento> buscarPorPeriodoDoBarbeiro(@Param("barbeiroId") Long barbeiroId,
+                                                   @Param("inicio") Instant inicio, @Param("fim") Instant fim);
+
+      @Query("""
+        SELECT a
+        FROM Agendamento a
+        JOIN FETCH a.servico
+        JOIN FETCH a.barbeiro
+        WHERE a.id > :aposId
+          AND a.barbeiro.id = :barbeiroId
+        ORDER BY a.id
+        """)
+      List<Agendamento> buscarCriadosAposDoBarbeiro(@Param("aposId") Long aposId, @Param("barbeiroId") Long barbeiroId);
+
+      @Query("SELECT COALESCE(MAX(a.id), 0) FROM Agendamento a WHERE a.barbeiro.id = :barbeiroId")
+      Long buscarUltimoIdDoBarbeiro(@Param("barbeiroId") Long barbeiroId);
+
       List<Agendamento> findByStatusAndDataHoraInicioLessThanEqual(StatusAgendamento status, Instant limite);       
       
       List<Agendamento> findByStatusAndDataHoraFimLessThanEqual(StatusAgendamento status, Instant limite);

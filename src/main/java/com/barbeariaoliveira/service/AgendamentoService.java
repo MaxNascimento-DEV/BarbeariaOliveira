@@ -3,6 +3,7 @@ package com.barbeariaoliveira.service;
 import java.time.*;
 import java.util.*;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import com.barbeariaoliveira.enums.StatusAgendamento;
 import com.barbeariaoliveira.exception.RecursoNaoEncontradoException;
 import com.barbeariaoliveira.exception.RegraNegocioException;
 import com.barbeariaoliveira.mapper.AgendamentoMapper;
+import com.barbeariaoliveira.notificacao.AvisoAgendamento;
 import com.barbeariaoliveira.repository.AgendamentoRepository;
 import com.barbeariaoliveira.repository.BarbeiroRepository;
 import com.barbeariaoliveira.repository.HorarioTrabalhoRepository;
@@ -33,19 +35,22 @@ public class AgendamentoService {
     private final HorarioTrabalhoRepository horarioTrabalhoRepository;
     private final AgendamentoMapper agendamentoMapper;
     private final BarbeariaProperties barbeariaProperties;
+    private final ApplicationEventPublisher eventos;
 
     public AgendamentoService(AgendamentoRepository agendamentoRepository,
             ServicoRepository servicoRepository,
             BarbeiroRepository barbeiroRepository,
             HorarioTrabalhoRepository horarioTrabalhoRepository,
             AgendamentoMapper agendamentoMapper,
-            BarbeariaProperties barbeariaProperties) {
+            BarbeariaProperties barbeariaProperties,
+            ApplicationEventPublisher eventos) {
         this.agendamentoRepository = agendamentoRepository;
         this.servicoRepository = servicoRepository;
         this.barbeiroRepository = barbeiroRepository;
         this.horarioTrabalhoRepository = horarioTrabalhoRepository;
         this.agendamentoMapper = agendamentoMapper;
         this.barbeariaProperties = barbeariaProperties;
+        this.eventos = eventos;
     }
 
     // ---------------- Ações públicas (chamadas pelos Controllers) ----------------
@@ -107,6 +112,8 @@ public class AgendamentoService {
                 .build();
 
         Agendamento salvo = agendamentoRepository.save(agendamento);
+        // Avisa no Telegram depois do commit (TelegramNotificador)
+        eventos.publishEvent(criarAviso(salvo, AvisoAgendamento.Tipo.NOVO));
         return agendamentoMapper.toResponse(salvo);
     }
 
@@ -116,6 +123,56 @@ public class AgendamentoService {
         mudarStatus(agendamento, StatusAgendamento.CONFIRMADO);
         Agendamento salvo = agendamentoRepository.save(agendamento);
         return agendamentoMapper.toResponse(salvo);
+    }
+
+    // ---- Painel do barbeiro: mesmas ações, só nos agendamentos dele ----
+
+    @Transactional
+    public AgendamentoResponse confirmarDoBarbeiro(Long id, Long barbeiroId) {
+        Agendamento agendamento = buscarDoBarbeiro(id, barbeiroId);
+        mudarStatus(agendamento, StatusAgendamento.CONFIRMADO);
+        return agendamentoMapper.toResponse(agendamentoRepository.save(agendamento));
+    }
+
+    @Transactional
+    public AgendamentoResponse cancelarDoBarbeiro(Long id, Long barbeiroId) {
+        Agendamento agendamento = buscarDoBarbeiro(id, barbeiroId);
+        mudarStatus(agendamento, StatusAgendamento.CANCELADO);
+        return agendamentoMapper.toResponse(agendamentoRepository.save(agendamento));
+    }
+
+    @Transactional(readOnly = true)
+    public List<AgendamentoResponse> listarPorDataDoBarbeiro(LocalDate data, Long barbeiroId) {
+        ZoneId fuso = barbeariaProperties.fusoHorario();
+        List<AgendamentoResponse> respostas = new ArrayList<>();
+        for (Agendamento agendamento : agendamentoRepository.buscarPorPeriodoDoBarbeiro(
+                barbeiroId, data.atStartOfDay(fuso).toInstant(), data.plusDays(1).atStartOfDay(fuso).toInstant())) {
+            respostas.add(agendamentoMapper.toResponse(agendamento));
+        }
+        return respostas;
+    }
+
+    @Transactional(readOnly = true)
+    public List<AgendamentoResponse> listarCriadosAposDoBarbeiro(Long aposId, Long barbeiroId) {
+        List<AgendamentoResponse> respostas = new ArrayList<>();
+        for (Agendamento agendamento : agendamentoRepository.buscarCriadosAposDoBarbeiro(aposId, barbeiroId)) {
+            respostas.add(agendamentoMapper.toResponse(agendamento));
+        }
+        return respostas;
+    }
+
+    @Transactional(readOnly = true)
+    public Long buscarUltimoIdDoBarbeiro(Long barbeiroId) {
+        return agendamentoRepository.buscarUltimoIdDoBarbeiro(barbeiroId);
+    }
+
+    /** Agendamento de OUTRO barbeiro responde "não encontrado" (não revela que existe). */
+    private Agendamento buscarDoBarbeiro(Long id, Long barbeiroId) {
+        Agendamento agendamento = buscarEntidadePorId(id);
+        if (barbeiroId == null || !barbeiroId.equals(agendamento.getBarbeiro().getId())) {
+            throw new RecursoNaoEncontradoException("Agendamento não encontrado.");
+        }
+        return agendamento;
     }
 
     @Transactional
@@ -150,7 +207,7 @@ public class AgendamentoService {
                 StatusAgendamento.AGENDADO, agora.plus(barbeariaProperties.prazoConfirmacao()));
         for (Agendamento agendamento : naoConfirmados) {
             mudarStatus(agendamento, StatusAgendamento.CANCELADO);
-            // TODO etapa 8: avisar o cliente pelo WhatsApp
+            eventos.publishEvent(criarAviso(agendamento, AvisoAgendamento.Tipo.CANCELADO_SEM_CONFIRMACAO));
         }
 
         // 2. Iniciar os confirmados cujo horário chegou
@@ -240,6 +297,35 @@ public class AgendamentoService {
     private Agendamento buscarEntidadePorId(Long id) {
         return agendamentoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Agendamento não encontrado."));
+    }
+
+    // Painel admin: avisos de agendamentos novos
+    @Transactional(readOnly = true)
+    public List<AgendamentoResponse> listarCriadosApos(Long aposId) {
+        List<AgendamentoResponse> respostas = new ArrayList<>();
+        for (Agendamento agendamento : agendamentoRepository.buscarCriadosApos(aposId)) {
+            respostas.add(agendamentoMapper.toResponse(agendamento));
+        }
+        return respostas;
+    }
+
+    @Transactional(readOnly = true)
+    public Long buscarUltimoId() {
+        return agendamentoRepository.buscarUltimoId();
+    }
+
+    // Copia os dados ainda dentro da transação (as relações são LAZY)
+    private AvisoAgendamento criarAviso(Agendamento a, AvisoAgendamento.Tipo tipo) {
+        return new AvisoAgendamento(
+                tipo,
+                a.getId(),
+                a.getNomeCliente(),
+                a.getTelefoneCliente(),
+                a.getServico().getNome(),
+                a.getValorCobrado(),
+                a.getBarbeiro().getNome(),
+                a.getBarbeiro().getTelegramChatId(),
+                LocalDateTime.ofInstant(a.getDataHoraInicio(), barbeariaProperties.fusoHorario()));
     }
 
     private void mudarStatus(Agendamento agendamento, StatusAgendamento novo) {
