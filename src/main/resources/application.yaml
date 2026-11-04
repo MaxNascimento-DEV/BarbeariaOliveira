@@ -2,6 +2,11 @@ spring:
   application:
     name: barbearia-oliveira
 
+  # Lê variáveis do arquivo .env na raiz do projeto (se existir).
+  # Variáveis de ambiente do sistema continuam valendo e têm prioridade.
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: jdbc:postgresql://localhost:5432/barbeariaOliveira
     username: ${DB_USERNAME:postgres}
@@ -29,6 +34,10 @@ barbearia:
   dias-maximos-antecedencia: 30
   prazo-confirmacao: 20m
   intervalo-horarios: 30m
+
+cors:
+  # Separe várias origens por vírgula. Ex.: CORS_ORIGENS=http://localhost:5173,https://barbeariaoliveira.com.br
+  origens-permitidas: ${CORS_ORIGENS:http://localhost:5173}
 
 jwt:
   segredo: ${JWT_SECRET}
