@@ -27,6 +27,9 @@ public class Barbeiro {
     @Column(nullable = false, length = 20)
     private String telefone;
 
+    @Column(name = "foto_url", length = 500)
+    private String fotoUrl;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean ativo = true;

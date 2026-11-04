@@ -12,6 +12,7 @@ import com.barbeariaoliveira.entity.Barbeiro;
 import com.barbeariaoliveira.exception.RecursoNaoEncontradoException;
 import com.barbeariaoliveira.exception.RegraNegocioException;
 import com.barbeariaoliveira.mapper.BarbeiroMapper;
+import com.barbeariaoliveira.mapper.ServicoMapper;
 import com.barbeariaoliveira.repository.BarbeiroRepository;
 import com.barbeariaoliveira.util.TelefoneUtils;
 
@@ -94,7 +95,8 @@ public class BarbeiroService {
 
         barbeiro.setNome(request.nome());
         barbeiro.setEspecialidade(normalizaEspecialidade(request.especialidade()));
-        barbeiro.setTelefone(request.telefone());
+        barbeiro.setTelefone(telefone);
+        barbeiro.setFotoUrl(ServicoMapper.textoOuNulo(request.fotoUrl()));
 
         barbeiroRepository.save(barbeiro);
         return barbeiroMapper.toResponse(barbeiro); 

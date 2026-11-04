@@ -31,6 +31,17 @@ public class Servico {
     @Column(name = "duracao_minutos", nullable = false)
     private Integer duracaoMinutos; 
 
+    @Column(length = 255)
+    private String descricao;
+
+    @Builder.Default
+    @Column(nullable = false, length = 20)
+    private String icone = "scissors";
+
+    @Builder.Default
+    @Column(nullable = false, length = 20)
+    private String categoria = "cabelo";
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean ativo = true; 

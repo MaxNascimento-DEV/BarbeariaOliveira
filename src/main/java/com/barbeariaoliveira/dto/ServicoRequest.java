@@ -17,6 +17,17 @@ public record ServicoRequest(
 
     @NotNull(message = "A duração é obrigatorio.")
     @Positive(message = "Duração tem que ser maior que zero.")
-    Integer duracaoMinutos
+    Integer duracaoMinutos,
+
+    @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres.")
+    String descricao,
+
+    // Opcional: se vier vazio, o mapper usa "scissors"
+    @Pattern(regexp = "^(scissors|beard|combo|razor|spa|color)$", message = "Ícone inválido.")
+    String icone,
+
+    // Opcional: se vier vazio, o mapper usa "cabelo"
+    @Pattern(regexp = "^(cabelo|barba|cuidados)$", message = "Categoria inválida.")
+    String categoria
 
 ) {}

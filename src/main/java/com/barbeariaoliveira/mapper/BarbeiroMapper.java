@@ -15,6 +15,7 @@ public class BarbeiroMapper {
         .nome(request.nome())
         .especialidade(request.especialidade())
         .telefone(request.telefone())
+        .fotoUrl(ServicoMapper.textoOuNulo(request.fotoUrl()))
         .build();
     }
 
@@ -24,6 +25,7 @@ public class BarbeiroMapper {
             barbeiro.getNome(),
             barbeiro.getEspecialidade(),
             barbeiro.getTelefone(),
+            barbeiro.getFotoUrl(),
             barbeiro.getAtivo()
         );
     }
@@ -32,7 +34,8 @@ public BarbeiroPublicResponse toPublicResponse(Barbeiro barbeiro) {
     return new BarbeiroPublicResponse(
             barbeiro.getId(),
             barbeiro.getNome(),
-            barbeiro.getEspecialidade()
+            barbeiro.getEspecialidade(),
+            barbeiro.getFotoUrl()
     );
 }
 }

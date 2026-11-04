@@ -8,6 +8,9 @@ public record ServicoResponse(
     String nome,
     BigDecimal valor,
     Integer duracaoMinutos,
+    String descricao,
+    String icone,
+    String categoria,
     Boolean ativo
 
 ) {

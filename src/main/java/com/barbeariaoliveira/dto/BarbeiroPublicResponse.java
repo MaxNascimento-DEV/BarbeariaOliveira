@@ -4,6 +4,7 @@ public record BarbeiroPublicResponse(
 
     Long id,
     String nome,
-    String especialidade
+    String especialidade,
+    String fotoUrl
     
 ) {}

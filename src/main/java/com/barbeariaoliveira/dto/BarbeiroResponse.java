@@ -6,5 +6,6 @@ public record BarbeiroResponse(
     String nome,
     String especialidade,
     String telefone,
+    String fotoUrl,
     Boolean ativo
 ) {}

@@ -40,7 +40,7 @@ public class ServicoService {
 
     @Transactional(readOnly = true)
     public List<ServicoResponse> listarAtivos(){
-        List<Servico> servicos = servicoRepository.findByAtivoTrueOrderByNomeDesc();
+        List<Servico> servicos = servicoRepository.findByAtivoTrueOrderByNomeAsc();
         List<ServicoResponse> respostas = new ArrayList<>();
         for(Servico servico : servicos){
             respostas.add(servicoMapper.toResponse(servico));
@@ -78,6 +78,9 @@ public class ServicoService {
         servico.setNome(request.nome());
         servico.setValor(request.valor());
         servico.setDuracaoMinutos(request.duracaoMinutos());
+        servico.setDescricao(ServicoMapper.textoOuNulo(request.descricao()));
+        servico.setIcone(ServicoMapper.textoOuPadrao(request.icone(), ServicoMapper.ICONE_PADRAO));
+        servico.setCategoria(ServicoMapper.textoOuPadrao(request.categoria(), ServicoMapper.CATEGORIA_PADRAO));
         
         servicoRepository.save(servico);
 

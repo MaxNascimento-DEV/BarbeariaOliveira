@@ -6,7 +6,7 @@ import com.barbeariaoliveira.entity.Servico;
 
 public interface ServicoRepository extends JpaRepository<Servico, Long> {
 
-    List<Servico> findByAtivoTrueOrderByNomeDesc();
+    List<Servico> findByAtivoTrueOrderByNomeAsc();
 
     boolean existsByNomeIgnoreCase(String nome);
 
