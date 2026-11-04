@@ -39,6 +39,15 @@ cors:
   # Separe várias origens por vírgula. Ex.: CORS_ORIGENS=http://localhost:5173,https://barbeariaoliveira.com.br
   origens-permitidas: ${CORS_ORIGENS:http://localhost:5173}
 
+telegram:
+  # Avisos de novos agendamentos no Telegram (veja o README)
+  habilitado: ${TELEGRAM_HABILITADO:false}
+  token: ${TELEGRAM_TOKEN:}
+  # Chats que recebem todos os avisos (ex.: dono). Separe por vírgula.
+  chat-ids-admin: ${TELEGRAM_CHAT_IDS:}
+  # Link do painel nas mensagens (só endereço público; localhost o Telegram recusa)
+  painel-url: ${PAINEL_URL:}
+
 jwt:
   segredo: ${JWT_SECRET}
   expiracao: 8h
