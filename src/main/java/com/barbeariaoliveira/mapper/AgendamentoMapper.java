@@ -26,9 +26,12 @@ public class AgendamentoMapper {
 
         return new AgendamentoResponse(
                 agendamento.getId(),
+                agendamento.getServico().getId(),
                 agendamento.getServico().getNome(),
+                agendamento.getBarbeiro().getId(),
                 agendamento.getBarbeiro().getNome(),
                 agendamento.getNomeCliente(),
+                agendamento.getTelefoneCliente(),
                 inicioLocal,
                 LocalDateTime.ofInstant(agendamento.getDataHoraFim(), fuso),
                 agendamento.getValorCobrado(),

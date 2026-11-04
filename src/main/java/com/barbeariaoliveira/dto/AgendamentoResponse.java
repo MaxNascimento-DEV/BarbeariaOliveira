@@ -7,9 +7,12 @@ import com.barbeariaoliveira.enums.StatusAgendamento;
 
 public record AgendamentoResponse(
     Long id,
+    Long servicoId,
     String nomeServico,
+    Long barbeiroId,
     String nomeBarbeiro,
     String nomeCliente,
+    String telefoneCliente,
     LocalDateTime dataHoraInicio,
     LocalDateTime dataHoraFim,
     BigDecimal valorCobrado,
