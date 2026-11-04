@@ -97,6 +97,7 @@ public class BarbeiroService {
         barbeiro.setEspecialidade(normalizaEspecialidade(request.especialidade()));
         barbeiro.setTelefone(telefone);
         barbeiro.setFotoUrl(ServicoMapper.textoOuNulo(request.fotoUrl()));
+        barbeiro.setTelegramChatId(ServicoMapper.textoOuNulo(request.telegramChatId()));
 
         barbeiroRepository.save(barbeiro);
         return barbeiroMapper.toResponse(barbeiro); 

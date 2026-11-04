@@ -7,5 +7,6 @@ public record BarbeiroResponse(
     String especialidade,
     String telefone,
     String fotoUrl,
+    String telegramChatId,
     Boolean ativo
 ) {}

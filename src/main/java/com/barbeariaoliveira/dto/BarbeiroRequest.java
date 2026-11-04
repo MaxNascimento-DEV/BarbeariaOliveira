@@ -20,5 +20,9 @@ public record BarbeiroRequest(
 
     @Size(max = 500, message = "A URL da foto deve ter no máximo 500 caracteres.")
     @Pattern(regexp = "^(https?://.+)?$", message = "A foto deve ser uma URL http(s).")
-    String fotoUrl
+    String fotoUrl,
+
+    // Opcional: ID do chat do Telegram (o bot informa ao barbeiro quando ele manda "oi")
+    @Pattern(regexp = "^(-?\\d{1,20})?$", message = "ID do Telegram inválido (só números).")
+    String telegramChatId
 ) {}

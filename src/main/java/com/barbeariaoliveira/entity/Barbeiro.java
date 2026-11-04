@@ -30,6 +30,9 @@ public class Barbeiro {
     @Column(name = "foto_url", length = 500)
     private String fotoUrl;
 
+    @Column(name = "telegram_chat_id", length = 30)
+    private String telegramChatId;
+
     @Builder.Default
     @Column(nullable = false)
     private Boolean ativo = true;

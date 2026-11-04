@@ -16,6 +16,7 @@ public class BarbeiroMapper {
         .especialidade(request.especialidade())
         .telefone(request.telefone())
         .fotoUrl(ServicoMapper.textoOuNulo(request.fotoUrl()))
+        .telegramChatId(ServicoMapper.textoOuNulo(request.telegramChatId()))
         .build();
     }
 
@@ -26,6 +27,7 @@ public class BarbeiroMapper {
             barbeiro.getEspecialidade(),
             barbeiro.getTelefone(),
             barbeiro.getFotoUrl(),
+            barbeiro.getTelegramChatId(),
             barbeiro.getAtivo()
         );
     }
