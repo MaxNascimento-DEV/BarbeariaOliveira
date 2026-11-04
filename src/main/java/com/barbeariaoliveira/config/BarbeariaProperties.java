@@ -8,6 +8,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "barbearia")
 public record BarbeariaProperties(
 
+    String nome,
+    String whatsapp,
     ZoneId fusoHorario,
     Duration antecedenciaMinima,
     int diasMaximosAntecedencia,

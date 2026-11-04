@@ -22,6 +22,8 @@ spring:
       admin_senha_hash: ${ADMIN_SENHA_HASH}
 
 barbearia:
+  nome: Barbearia Oliveira
+  whatsapp: ${BARBEARIA_WHATSAPP:}
   fuso-horario: America/Recife
   antecedencia-minima: 60m
   dias-maximos-antecedencia: 30

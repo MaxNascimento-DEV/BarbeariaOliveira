@@ -13,5 +13,7 @@ public record AgendamentoResponse(
     LocalDateTime dataHoraInicio,
     LocalDateTime dataHoraFim,
     BigDecimal valorCobrado,
-    StatusAgendamento status
+    StatusAgendamento status,
+    String linkWhatsAppBarbearia,   // botão do cliente: "Enviar meu agendamento para a barbearia"
+    String linkWhatsAppCliente      // botão do painel admin: "Avisar cliente"
 ) {}
