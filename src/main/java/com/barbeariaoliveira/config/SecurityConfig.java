@@ -38,6 +38,7 @@ public class SecurityConfig {
                         // Pré-flight do navegador (CORS) não leva token
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()   // health check do Railway
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/conta/**").authenticated()      // qualquer logado (inclusive com senha provisória)
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
