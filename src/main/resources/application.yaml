@@ -57,6 +57,13 @@ server:
   # O Railway informa a porta na variável PORT
   port: ${PORT:8080}
 
+# Documentação da API (Swagger). Em produção: SWAGGER_HABILITADO=false
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_HABILITADO:true}
+  swagger-ui:
+    enabled: ${SWAGGER_HABILITADO:true}
+
 management:
   endpoints:
     web:

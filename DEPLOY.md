@@ -33,6 +33,7 @@ Antes de começar:
 
    BARBEARIA_WHATSAPP=5581984920075
    CONFIAR_PROXY=true
+   SWAGGER_HABILITADO=false
    CORS_ORIGENS=https://<preencha no passo 3.4>
 
    TELEGRAM_HABILITADO=true
