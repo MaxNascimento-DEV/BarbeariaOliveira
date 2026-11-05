@@ -11,6 +11,8 @@ API Spring Boot 4 (Java 21) + PostgreSQL do sistema de agendamento.
 
 Swagger: http://localhost:8080/swagger-ui.html
 
+**Colocar no ar (Railway + Vercel):** veja [DEPLOY.md](DEPLOY.md).
+
 ## Primeiro uso
 
 - Entre em http://localhost:5173/admin/login com o admin criado pela migration V6.
